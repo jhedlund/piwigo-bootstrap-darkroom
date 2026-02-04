@@ -49,6 +49,8 @@ function startPhotoSwipe(idx) {
                          $size_medium    = $(this).data('size-medium').split(' x '),
                          $width_medium   = $size_medium[0],
                          $height_medium  = $size_medium[1],
+                         $imageid        = $(this).data('src-imageid'),
+                         $name           = $(this).data('name'),
                          $href           = $(this).attr('href'),
                          $title          = '<a href="' + $href + '"><div><div>' + $(this).data('name');
                          $title         += '</div>';
@@ -59,6 +61,8 @@ function startPhotoSwipe(idx) {
                      var item = {
                          is_video: false,
                          href: $href,
+                         imageid: $imageid,
+                         name: $name,
                          mediumImage: {
                              src   : $src_medium,
                              w     : $width_medium,
@@ -202,12 +206,22 @@ function startPhotoSwipe(idx) {
             $('.pswp__button--details').on('click touchstart', function() {
                 location.href = photoSwipe.currItem.href
             });
+            $('.pswp__button--download').on('click touchstart', function() {
+                var link = document.createElement("a");
+                link.href = "/photos/action.php?id=" + photoSwipe.currItem.imageid + "&part=e&download";
+                link.click();
+            });
         });
 
         photoSwipe.listen('afterChange', function() {
             detectVideo(photoSwipe);
             $('.pswp__button--details').off().on('click touchstart', function() {
                 location.href = photoSwipe.currItem.href
+            });
+            $('.pswp__button--download').on('click touchstart', function() {
+                var link = document.createElement("a");
+                link.href = "/photos/action.php?id=" + photoSwipe.currItem.imageid + "&part=e&download";
+                link.click();
             });
         });
 

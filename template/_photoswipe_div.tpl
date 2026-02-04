@@ -13,6 +13,7 @@
 {if $theme_config->social_enabled}
                  <button class="pswp__button pswp__button--share" title="{'Share'|@translate}"></button>
 {/if}
+                 <button class="pswp__button pswp__button--download" title="{'Download this file'|@translate}"></button>
                  <button class="pswp__button pswp__button--fs" title="{'Toggle fullscreen'|@translate}"></button>
                  <button class="pswp__button pswp__button--zoom" title="{'Zoom in/out'|@translate}"></button>
                  <button class="pswp__button pswp__button--details" title="{'Picture details'|@translate}"></button>
