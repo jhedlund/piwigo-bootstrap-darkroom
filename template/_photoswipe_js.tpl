@@ -204,6 +204,8 @@ function startPhotoSwipe(idx) {
         var pswpDownloadBusy = false;
         var pswpShareFile = null;
         var pswpShareFileId = null;
+        var pswpDlBar = $('.pswp__dl-progress');
+        var pswpDlFill = $('.pswp__dl-progress__fill');
         var pswpClearReady = function() {
             pswpShareFile = null;
             pswpShareFileId = null;
@@ -241,11 +243,35 @@ function startPhotoSwipe(idx) {
             pswpDownloadBusy = true;
             btn.addClass('busy');
             $('.pswp__ui').addClass('pswp__ui--dl-active');
+            pswpDlBar.addClass('active');
+            pswpDlFill.css('width', '0%');
             fetch(url, { credentials: 'same-origin' }).then(function(resp) {
                 if (!resp.ok) { throw new Error('HTTP ' + resp.status); }
                 var cd = resp.headers.get('Content-Disposition') || '';
                 var m = cd.match(/filename="?([^";]+)"?/);
-                return resp.blob().then(function(blob) {
+                var ctype = resp.headers.get('Content-Type') || 'image/jpeg';
+                var total = parseInt(resp.headers.get('Content-Length'), 10) || 0;
+                var readBlob;
+                if (resp.body && resp.body.getReader) {
+                    pswpDlBar.toggleClass('indeterminate', !total);
+                    var reader = resp.body.getReader();
+                    var chunks = [];
+                    var received = 0;
+                    readBlob = function next() {
+                        return reader.read().then(function(r) {
+                            if (r.done) { return new Blob(chunks, { type: ctype }); }
+                            chunks.push(r.value);
+                            received += r.value.length;
+                            if (total) { pswpDlFill.css('width', Math.min(100, received / total * 100) + '%'); }
+                            return next();
+                        });
+                    }();
+                } else {
+                    /* No streaming support: plain blob with an indeterminate bar. */
+                    pswpDlBar.addClass('indeterminate');
+                    readBlob = resp.blob();
+                }
+                return readBlob.then(function(blob) {
                     var ext = (blob.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
                     var fname = m ? m[1] : ((item.name || 'photo') + '.' + ext);
                     var file = new File([blob], fname, { type: blob.type });
@@ -273,6 +299,8 @@ function startPhotoSwipe(idx) {
                 pswpDownloadBusy = false;
                 btn.removeClass('busy');
                 if (!pswpShareFile) { $('.pswp__ui').removeClass('pswp__ui--dl-active'); }
+                pswpDlBar.removeClass('active indeterminate');
+                pswpDlFill.css('width', '0%');
             });
         });
 

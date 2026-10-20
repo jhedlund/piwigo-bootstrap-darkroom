@@ -846,9 +846,7 @@ i.video-indicator {
 }
 
 .pswp__button--download.busy:before {
-  content: "\f110";
-  display: inline-block;
-  animation: fa-spin 1s infinite linear;
+  opacity: 0.4;
 }
 
 .pswp__ui--dl-active .pswp__top-bar {
@@ -858,6 +856,7 @@ i.video-indicator {
 
 .pswp__button--download.ready:before {
   content: "\f064";
+  color: #2997ff;
   animation: pswp-dl-ready-pulse 1.2s ease-in-out infinite;
 }
 
@@ -867,6 +866,46 @@ i.video-indicator {
   }
   50% {
     opacity: 0.35;
+  }
+}
+
+.pswp__dl-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.pswp__dl-progress.active {
+  opacity: 1;
+}
+
+.pswp__dl-progress__fill {
+  height: 100%;
+  width: 0;
+  background: #2997ff;
+  transition: width 0.15s linear;
+}
+
+.pswp__dl-progress.indeterminate .pswp__dl-progress__fill {
+  width: 30%;
+  animation: pswp-dl-indeterminate 1.2s ease-in-out infinite;
+}
+
+@keyframes pswp-dl-indeterminate {
+  0% {
+    margin-left: 0;
+  }
+  50% {
+    margin-left: 70%;
+  }
+  100% {
+    margin-left: 0;
   }
 }
 

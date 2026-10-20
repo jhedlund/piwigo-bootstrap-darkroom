@@ -25,6 +25,7 @@
                        </div>
                      </div>
                  </div>
+                 <div class="pswp__dl-progress"><div class="pswp__dl-progress__fill"></div></div>
              </div>
              <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
                  <div class="pswp__share-tooltip"></div>
