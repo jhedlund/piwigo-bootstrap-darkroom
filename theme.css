@@ -851,9 +851,23 @@ i.video-indicator {
   animation: fa-spin 1s infinite linear;
 }
 
+.pswp__ui--dl-active .pswp__top-bar {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 .pswp__button--download.ready:before {
   content: "\f064";
-  animation: none;
+  animation: pswp-dl-ready-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pswp-dl-ready-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
 }
 
 .pswp__button {

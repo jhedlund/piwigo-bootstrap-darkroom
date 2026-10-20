@@ -208,6 +208,7 @@ function startPhotoSwipe(idx) {
             pswpShareFile = null;
             pswpShareFileId = null;
             $('.pswp__button--download').removeClass('ready');
+            $('.pswp__ui').removeClass('pswp__ui--dl-active');
         };
         /* A previous lightbox open may have left the button in the ready state. */
         pswpClearReady();
@@ -239,6 +240,7 @@ function startPhotoSwipe(idx) {
             }
             pswpDownloadBusy = true;
             btn.addClass('busy');
+            $('.pswp__ui').addClass('pswp__ui--dl-active');
             fetch(url, { credentials: 'same-origin' }).then(function(resp) {
                 if (!resp.ok) { throw new Error('HTTP ' + resp.status); }
                 var cd = resp.headers.get('Content-Disposition') || '';
@@ -257,7 +259,7 @@ function startPhotoSwipe(idx) {
                                 pswpShareFile = file;
                                 pswpShareFileId = item.imageid;
                                 btn.addClass('ready');
-                                $('.pswp__ui').removeClass('pswp__ui--idle');
+                                if (photoSwipe.ui && photoSwipe.ui.showControls) { photoSwipe.ui.showControls(); }
                             }
                             return;
                         }
@@ -270,6 +272,7 @@ function startPhotoSwipe(idx) {
             }).finally(function() {
                 pswpDownloadBusy = false;
                 btn.removeClass('busy');
+                if (!pswpShareFile) { $('.pswp__ui').removeClass('pswp__ui--dl-active'); }
             });
         });
 
