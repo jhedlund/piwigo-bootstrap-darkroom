@@ -206,11 +206,22 @@ function startPhotoSwipe(idx) {
         var pswpShareFileId = null;
         var pswpDlBar = $('.pswp__dl-progress');
         var pswpDlFill = $('.pswp__dl-progress__fill');
+        var pswpDropPin = function() {
+            var ui = $('.pswp__ui');
+            if (ui.hasClass('pswp__ui--dl-active') || ui.hasClass('pswp__ui--dl-ready')) {
+                /* The pin may have been masking PhotoSwipe's idle/hidden state (iOS arms the
+                   idle timer via synthesized mouse events on tap, and nothing clears it on
+                   swipe). Re-assert a genuinely visible toolbar before the pin drops. */
+                if (photoSwipe.ui && photoSwipe.ui.setIdle) { photoSwipe.ui.setIdle(false); }
+                if (photoSwipe.ui && photoSwipe.ui.showControls) { photoSwipe.ui.showControls(); }
+            }
+            ui.removeClass('pswp__ui--dl-active pswp__ui--dl-ready');
+        };
         var pswpClearReady = function() {
             pswpShareFile = null;
             pswpShareFileId = null;
             $('.pswp__button--download').removeClass('ready');
-            $('.pswp__ui').removeClass('pswp__ui--dl-active pswp__ui--dl-ready');
+            pswpDropPin();
             pswpDlBar.removeClass('active indeterminate');
             pswpDlFill.css('width', '0%');
         };
@@ -310,7 +321,7 @@ function startPhotoSwipe(idx) {
                     pswpDlBar.removeClass('indeterminate');
                     pswpDlFill.css('width', '100%');
                 } else {
-                    $('.pswp__ui').removeClass('pswp__ui--dl-active');
+                    pswpDropPin();
                     pswpDlBar.removeClass('active indeterminate');
                     pswpDlFill.css('width', '0%');
                 }
