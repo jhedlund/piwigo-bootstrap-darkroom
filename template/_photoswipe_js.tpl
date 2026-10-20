@@ -242,9 +242,10 @@ function startPhotoSwipe(idx) {
             };
             var ua = navigator.userAgent;
             var isIOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-            var isAndroid = /Android/.test(ua);
-            /* Mobile only: desktop Chrome/Edge can share files too, but there a plain download is wanted. */
-            if (item.is_video || !(isIOS || isAndroid) || typeof navigator.canShare !== 'function') {
+            /* iOS only: its share sheet has a Save Image action, and a plain download would go to Files,
+               not Photos. Android's share sheet has no save target, and its native download manager
+               already saves to Downloads/gallery, so Android takes the plain-download path with desktop. */
+            if (item.is_video || !isIOS || typeof navigator.canShare !== 'function') {
                 fallbackDownload();
                 return;
             }
