@@ -216,7 +216,11 @@ function startPhotoSwipe(idx) {
         };
         /* A previous lightbox open may have left the button in the ready state. */
         pswpClearReady();
-        $('.pswp__button--download, .pswp__dl-cta').off('click').on('click', function() {
+        $('.pswp__button--download, .pswp__dl-cta').off('click pswpTap').on('pswpTap', function(e) {
+            /* PhotoSwipe stops pswpTap propagation only for its own registered buttons;
+               unregistered controls bubble to onGlobalTap, which toggles the toolbar. */
+            e.stopPropagation();
+        }).on('click', function() {
             var item = photoSwipe.currItem;
             if (!item || pswpDownloadBusy) return;
             var url = "{$ROOT_URL}action.php?id=" + item.imageid + "&part=e&download";
