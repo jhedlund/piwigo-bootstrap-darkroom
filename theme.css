@@ -851,6 +851,11 @@ i.video-indicator {
   animation: fa-spin 1s infinite linear;
 }
 
+.pswp__button--download.ready:before {
+  content: "\f064";
+  animation: none;
+}
+
 .pswp__button {
   z-index: 2000;
 }

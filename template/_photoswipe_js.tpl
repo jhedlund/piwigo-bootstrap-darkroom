@@ -202,6 +202,15 @@ function startPhotoSwipe(idx) {
 
         /* Bound once per lightbox open; .off() drops the previous open's handler since .pswp is static. */
         var pswpDownloadBusy = false;
+        var pswpShareFile = null;
+        var pswpShareFileId = null;
+        var pswpClearReady = function() {
+            pswpShareFile = null;
+            pswpShareFileId = null;
+            $('.pswp__button--download').removeClass('ready');
+        };
+        /* A previous lightbox open may have left the button in the ready state. */
+        pswpClearReady();
         $('.pswp__button--download').off('click').on('click', function() {
             var item = photoSwipe.currItem;
             if (!item || pswpDownloadBusy) return;
@@ -220,6 +229,14 @@ function startPhotoSwipe(idx) {
                 return;
             }
             var btn = $(this);
+            if (pswpShareFile && pswpShareFileId === item.imageid) {
+                /* Second tap: file already in memory, so share() runs synchronously inside the gesture. */
+                navigator.share({ files: [pswpShareFile] }).then(pswpClearReady).catch(function(err) {
+                    /* Keep the cache on cancel so another tap still opens the sheet instantly. */
+                    if (!err || err.name !== 'AbortError') { pswpClearReady(); fallbackDownload(); }
+                });
+                return;
+            }
             pswpDownloadBusy = true;
             btn.addClass('busy');
             fetch(url, { credentials: 'same-origin' }).then(function(resp) {
@@ -231,7 +248,21 @@ function startPhotoSwipe(idx) {
                     var fname = m ? m[1] : ((item.name || 'photo') + '.' + ext);
                     var file = new File([blob], fname, { type: blob.type });
                     if (!navigator.canShare({ files: [file] })) { throw new Error('files not shareable'); }
-                    return navigator.share({ files: [file] });
+                    return navigator.share({ files: [file] }).catch(function(err) {
+                        if (err && err.name === 'NotAllowedError') {
+                            /* Tap's user activation expired during the fetch. Cache the file and ask
+                               for one more tap, which can call share() synchronously. Only if the
+                               user hasn't swiped away meanwhile. */
+                            if (photoSwipe.currItem && photoSwipe.currItem.imageid === item.imageid) {
+                                pswpShareFile = file;
+                                pswpShareFileId = item.imageid;
+                                btn.addClass('ready');
+                                $('.pswp__ui').removeClass('pswp__ui--idle');
+                            }
+                            return;
+                        }
+                        throw err;
+                    });
                 });
             }).catch(function(err) {
                 /* AbortError = user dismissed the share sheet; anything else degrades to a plain download. */
@@ -255,6 +286,7 @@ function startPhotoSwipe(idx) {
         });
 
         photoSwipe.listen('afterChange', function() {
+            pswpClearReady();
             detectVideo(photoSwipe);
             $('.pswp__button--details').off().on('click touchstart', function() {
                 location.href = photoSwipe.currItem.href
