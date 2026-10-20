@@ -210,11 +210,13 @@ function startPhotoSwipe(idx) {
             pswpShareFile = null;
             pswpShareFileId = null;
             $('.pswp__button--download').removeClass('ready');
-            $('.pswp__ui').removeClass('pswp__ui--dl-active');
+            $('.pswp__ui').removeClass('pswp__ui--dl-active pswp__ui--dl-ready');
+            pswpDlBar.removeClass('active indeterminate');
+            pswpDlFill.css('width', '0%');
         };
         /* A previous lightbox open may have left the button in the ready state. */
         pswpClearReady();
-        $('.pswp__button--download').off('click').on('click', function() {
+        $('.pswp__button--download, .pswp__dl-cta').off('click').on('click', function() {
             var item = photoSwipe.currItem;
             if (!item || pswpDownloadBusy) return;
             var url = "{$ROOT_URL}action.php?id=" + item.imageid + "&part=e&download";
@@ -231,7 +233,7 @@ function startPhotoSwipe(idx) {
                 fallbackDownload();
                 return;
             }
-            var btn = $(this);
+            var btn = $('.pswp__button--download');
             if (pswpShareFile && pswpShareFileId === item.imageid) {
                 /* Second tap: file already in memory, so share() runs synchronously inside the gesture. */
                 navigator.share({ files: [pswpShareFile] }).then(pswpClearReady).catch(function(err) {
@@ -285,6 +287,7 @@ function startPhotoSwipe(idx) {
                                 pswpShareFile = file;
                                 pswpShareFileId = item.imageid;
                                 btn.addClass('ready');
+                                $('.pswp__ui').addClass('pswp__ui--dl-ready');
                                 if (photoSwipe.ui && photoSwipe.ui.showControls) { photoSwipe.ui.showControls(); }
                             }
                             return;
@@ -298,9 +301,15 @@ function startPhotoSwipe(idx) {
             }).finally(function() {
                 pswpDownloadBusy = false;
                 btn.removeClass('busy');
-                if (!pswpShareFile) { $('.pswp__ui').removeClass('pswp__ui--dl-active'); }
-                pswpDlBar.removeClass('active indeterminate');
-                pswpDlFill.css('width', '0%');
+                if (pswpShareFile) {
+                    /* Ready and waiting: solid full bar until the user saves, cancels out, or swipes. */
+                    pswpDlBar.removeClass('indeterminate');
+                    pswpDlFill.css('width', '100%');
+                } else {
+                    $('.pswp__ui').removeClass('pswp__ui--dl-active');
+                    pswpDlBar.removeClass('active indeterminate');
+                    pswpDlFill.css('width', '0%');
+                }
             });
         });
 

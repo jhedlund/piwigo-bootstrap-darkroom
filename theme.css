@@ -855,7 +855,6 @@ i.video-indicator {
 }
 
 .pswp__button--download.ready:before {
-  content: "\f064";
   color: #2997ff;
   animation: pswp-dl-ready-pulse 1.2s ease-in-out infinite;
 }
@@ -907,6 +906,33 @@ i.video-indicator {
   100% {
     margin-left: 0;
   }
+}
+
+.pswp__dl-cta {
+  display: none;
+  position: absolute;
+  top: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  background: #2997ff;
+  color: #fff;
+  border: 0;
+  border-radius: 22px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  animation: pswp-dl-ready-pulse 1.2s ease-in-out infinite;
+}
+
+.pswp__ui--dl-ready .pswp__dl-cta {
+  display: block;
+}
+
+.pswp__ui--dl-ready .pswp__dl-progress {
+  opacity: 1;
 }
 
 .pswp__button {
