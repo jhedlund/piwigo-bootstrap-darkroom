@@ -849,6 +849,13 @@ i.video-indicator {
   opacity: 0.4;
 }
 
+@media (hover: none) {
+  .pswp__button--download:hover,
+  .pswp__button--download:focus {
+    opacity: 0.75;
+  }
+}
+
 .pswp__ui--dl-active .pswp__top-bar {
   opacity: 1 !important;
   visibility: visible !important;

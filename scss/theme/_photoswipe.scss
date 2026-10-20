@@ -30,6 +30,10 @@
   color: #fff;
 }
 .pswp__button--download.busy:before { opacity: .4; }
+@media (hover: none) {
+  .pswp__button--download:hover,
+  .pswp__button--download:focus { opacity: .75; }
+}
 .pswp__ui--dl-active .pswp__top-bar {
   opacity: 1 !important;
   visibility: visible !important;
