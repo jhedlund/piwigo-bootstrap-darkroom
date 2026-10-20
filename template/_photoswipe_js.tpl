@@ -21,11 +21,15 @@ function startPhotoSwipe(idx) {
                          $size_preview   = $(this).data('size-medium').split(' x '),
                          $width_preview  = $size_preview[0],
                          $height_preview = $size_preview[1],
+                         $imageid        = $(this).data('src-imageid'),
+                         $name           = $(this).data('name'),
                          $href           = $(this).attr('href'),
                          $title          = '<a href="' + $href + '">' + $(this).data('name') + '</a><ul><li>' + $(this).data('description') + '</li></ul>';
                      var item = {
                          is_video : true,
                          href     : $href,
+                         imageid  : $imageid,
+                         name     : $name,
                          src      : $src_preview,
                          w        : $width_preview,
                          h        : $height_preview,
@@ -196,6 +200,48 @@ function startPhotoSwipe(idx) {
 
         photoSwipe.init();
 
+        /* Bound once per lightbox open; .off() drops the previous open's handler since .pswp is static. */
+        var pswpDownloadBusy = false;
+        $('.pswp__button--download').off('click').on('click', function() {
+            var item = photoSwipe.currItem;
+            if (!item || pswpDownloadBusy) return;
+            var url = "{$ROOT_URL}action.php?id=" + item.imageid + "&part=e&download";
+            var fallbackDownload = function() {
+                var link = document.createElement("a");
+                link.href = url;
+                link.click();
+            };
+            var ua = navigator.userAgent;
+            var isIOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+            var isAndroid = /Android/.test(ua);
+            /* Mobile only: desktop Chrome/Edge can share files too, but there a plain download is wanted. */
+            if (item.is_video || !(isIOS || isAndroid) || typeof navigator.canShare !== 'function') {
+                fallbackDownload();
+                return;
+            }
+            var btn = $(this);
+            pswpDownloadBusy = true;
+            btn.addClass('busy');
+            fetch(url, { credentials: 'same-origin' }).then(function(resp) {
+                if (!resp.ok) { throw new Error('HTTP ' + resp.status); }
+                var cd = resp.headers.get('Content-Disposition') || '';
+                var m = cd.match(/filename="?([^";]+)"?/);
+                return resp.blob().then(function(blob) {
+                    var ext = (blob.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+                    var fname = m ? m[1] : ((item.name || 'photo') + '.' + ext);
+                    var file = new File([blob], fname, { type: blob.type });
+                    if (!navigator.canShare({ files: [file] })) { throw new Error('files not shareable'); }
+                    return navigator.share({ files: [file] });
+                });
+            }).catch(function(err) {
+                /* AbortError = user dismissed the share sheet; anything else degrades to a plain download. */
+                if (!err || err.name !== 'AbortError') { fallbackDownload(); }
+            }).finally(function() {
+                pswpDownloadBusy = false;
+                btn.removeClass('busy');
+            });
+        });
+
         detectVideo(photoSwipe);
 
         photoSwipe.listen('initialZoomInEnd', function() {
@@ -206,22 +252,12 @@ function startPhotoSwipe(idx) {
             $('.pswp__button--details').on('click touchstart', function() {
                 location.href = photoSwipe.currItem.href
             });
-            $('.pswp__button--download').on('click touchstart', function() {
-                var link = document.createElement("a");
-                link.href = "/photos/action.php?id=" + photoSwipe.currItem.imageid + "&part=e&download";
-                link.click();
-            });
         });
 
         photoSwipe.listen('afterChange', function() {
             detectVideo(photoSwipe);
             $('.pswp__button--details').off().on('click touchstart', function() {
                 location.href = photoSwipe.currItem.href
-            });
-            $('.pswp__button--download').on('click touchstart', function() {
-                var link = document.createElement("a");
-                link.href = "/photos/action.php?id=" + photoSwipe.currItem.imageid + "&part=e&download";
-                link.click();
             });
         });
 

@@ -834,6 +834,23 @@ i.video-indicator {
   color: #fff;
 }
 
+.pswp__button--download {
+  background: none !important;
+}
+
+.pswp__button--download:before {
+  content: "\f019";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  color: #fff;
+}
+
+.pswp__button--download.busy:before {
+  content: "\f110";
+  display: inline-block;
+  animation: fa-spin 1s infinite linear;
+}
+
 .pswp__button {
   z-index: 2000;
 }
