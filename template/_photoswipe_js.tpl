@@ -234,18 +234,13 @@ function startPhotoSwipe(idx) {
         }).on('click', function() {
             var item = photoSwipe.currItem;
             if (!item || pswpDownloadBusy) return;
-            var url = "{$ROOT_URL}action.php?id=" + item.imageid + "&part=e&download";
             var fallbackDownload = function() {
-                var link = document.createElement("a");
-                link.href = url;
-                link.click();
+                dlFallbackDownload(item.imageid);
             };
-            var ua = navigator.userAgent;
-            var isIOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
             /* iOS only: its share sheet has a Save Image action, and a plain download would go to Files,
                not Photos. Android's share sheet has no save target, and its native download manager
                already saves to Downloads/gallery, so Android takes the plain-download path with desktop. */
-            if (item.is_video || !isIOS || typeof navigator.canShare !== 'function') {
+            if (item.is_video || !dlIsIOS() || typeof navigator.canShare !== 'function') {
                 fallbackDownload();
                 return;
             }
@@ -263,53 +258,26 @@ function startPhotoSwipe(idx) {
             $('.pswp__ui').addClass('pswp__ui--dl-active');
             pswpDlBar.addClass('active');
             pswpDlFill.css('width', '0%');
-            fetch(url, { credentials: 'same-origin' }).then(function(resp) {
-                if (!resp.ok) { throw new Error('HTTP ' + resp.status); }
-                var cd = resp.headers.get('Content-Disposition') || '';
-                var m = cd.match(/filename="?([^";]+)"?/);
-                var ctype = resp.headers.get('Content-Type') || 'image/jpeg';
-                var total = parseInt(resp.headers.get('Content-Length'), 10) || 0;
-                var readBlob;
-                if (resp.body && resp.body.getReader) {
-                    pswpDlBar.toggleClass('indeterminate', !total);
-                    var reader = resp.body.getReader();
-                    var chunks = [];
-                    var received = 0;
-                    readBlob = function next() {
-                        return reader.read().then(function(r) {
-                            if (r.done) { return new Blob(chunks, { type: ctype }); }
-                            chunks.push(r.value);
-                            received += r.value.length;
-                            if (total) { pswpDlFill.css('width', Math.min(100, received / total * 100) + '%'); }
-                            return next();
-                        });
-                    }();
-                } else {
-                    /* No streaming support: plain blob with an indeterminate bar. */
-                    pswpDlBar.addClass('indeterminate');
-                    readBlob = resp.blob();
-                }
-                return readBlob.then(function(blob) {
-                    var ext = (blob.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
-                    var fname = m ? m[1] : ((item.name || 'photo') + '.' + ext);
-                    var file = new File([blob], fname, { type: blob.type });
-                    if (!navigator.canShare({ files: [file] })) { throw new Error('files not shareable'); }
-                    return navigator.share({ files: [file] }).catch(function(err) {
-                        if (err && err.name === 'NotAllowedError') {
-                            /* Tap's user activation expired during the fetch. Cache the file and ask
-                               for one more tap, which can call share() synchronously. Only if the
-                               user hasn't swiped away meanwhile. */
-                            if (photoSwipe.currItem && photoSwipe.currItem.imageid === item.imageid) {
-                                pswpShareFile = file;
-                                pswpShareFileId = item.imageid;
-                                btn.addClass('ready');
-                                $('.pswp__ui').addClass('pswp__ui--dl-ready');
-                                if (photoSwipe.ui && photoSwipe.ui.showControls) { photoSwipe.ui.showControls(); }
-                            }
-                            return;
+            dlFetchOriginal(item.imageid, item.name, function(received, total) {
+                pswpDlBar.toggleClass('indeterminate', !total);
+                if (total) { pswpDlFill.css('width', Math.min(100, received / total * 100) + '%'); }
+            }).then(function(file) {
+                if (!navigator.canShare({ files: [file] })) { throw new Error('files not shareable'); }
+                return navigator.share({ files: [file] }).catch(function(err) {
+                    if (err && err.name === 'NotAllowedError') {
+                        /* Tap's user activation expired during the fetch. Cache the file and ask
+                           for one more tap, which can call share() synchronously. Only if the
+                           user hasn't swiped away meanwhile. */
+                        if (photoSwipe.currItem && photoSwipe.currItem.imageid === item.imageid) {
+                            pswpShareFile = file;
+                            pswpShareFileId = item.imageid;
+                            btn.addClass('ready');
+                            $('.pswp__ui').addClass('pswp__ui--dl-ready');
+                            if (photoSwipe.ui && photoSwipe.ui.showControls) { photoSwipe.ui.showControls(); }
                         }
-                        throw err;
-                    });
+                        return;
+                    }
+                    throw err;
                 });
             }).catch(function(err) {
                 /* AbortError = user dismissed the share sheet; anything else degrades to a plain download. */

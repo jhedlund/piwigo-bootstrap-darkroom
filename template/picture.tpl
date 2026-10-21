@@ -128,6 +128,9 @@ $('#theImage img').bind('swipeleft swiperight', function (event) {
   {if $theme_config->slick_enabled && sizeOf($thumbnails) > 1}
     {include file="_slick_js.tpl"}
   {/if}
+  {if $theme_config->photoswipe}
+    {include file="_download_core_js.tpl"}
+  {/if}
   {if $theme_config->photoswipe && !$theme_config->slick_infinite}
     {include file="_photoswipe_js.tpl" selector="#thumbnailCarousel"}
   {/if}

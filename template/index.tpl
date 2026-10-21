@@ -282,6 +282,7 @@ $(document).ready(function() {
 {/foreach}
 
 
+{include file='_download_core_js.tpl'}
 {include file='_photoswipe_js.tpl' selector='#photoSwipeData'}
         </div>
 {footer_script require='jquery' require='photoswipe'}{strip}
