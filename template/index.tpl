@@ -148,6 +148,13 @@
 {/if}
 {if !empty($PLUGIN_INDEX_BUTTONS)}{foreach from=$PLUGIN_INDEX_BUTTONS item=button}<li>{$button}</li>{/foreach}{/if}
 {if !empty($PLUGIN_INDEX_ACTIONS)}{$PLUGIN_INDEX_ACTIONS}{/if}
+{if $theme_config->photoswipe && !empty($THUMBNAILS) && !isset($GThumb) && !isset($GDThumb)}
+                    <li id="btn-select" class="nav-item">
+                        <a class="nav-link" href="javascript:;" title="Select photos to download">
+                            <i class="far fa-check-square fa-fw"></i><span class="d-lg-none ml-2">Select photos to download</span>
+                        </a>
+                    </li>
+{/if}
 {if ((!empty($CATEGORIES) && !isset($GDThumb)) || (!empty($THUMBNAILS) && !isset($GThumb) && !isset($GDThumb))) && ($theme_config->category_wells == 'never' || ($theme_config->category_wells == 'mobile_only' && get_device() == 'desktop'))}
                     <li id="btn-grid" class="nav-item{if isset($smarty.cookies.view) and $smarty.cookies.view != 'list'} active{/if}">
                         <a class="nav-link" href="javascript:;" title="{'Grid view'|@translate}">
@@ -285,6 +292,16 @@ $(document).ready(function() {
 {include file='_download_core_js.tpl'}
 {include file='_photoswipe_js.tpl' selector='#photoSwipeData'}
         </div>
+{if !isset($GThumb) && !isset($GDThumb)}
+        <div id="multi-dl-bar" class="multi-dl-bar" role="toolbar" aria-label="Selected photos">
+            <div class="multi-dl-progress"><div class="multi-dl-progress__fill"></div></div>
+            <button type="button" class="multi-dl-all">All</button>
+            <span class="multi-dl-count" aria-live="polite"></span>
+            <button type="button" class="multi-dl-go" disabled><i class="fas fa-download" aria-hidden="true"></i> <span class="multi-dl-go-label">Download</span></button>
+            <button type="button" class="multi-dl-close" aria-label="Cancel selection"><i class="fas fa-times" aria-hidden="true"></i></button>
+        </div>
+{include file='_multidownload_js.tpl'}
+{/if}
 {footer_script require='jquery' require='photoswipe'}{strip}
 $('#startSlideshow').on('click touchstart', function() {
    startPhotoSwipe(0);
