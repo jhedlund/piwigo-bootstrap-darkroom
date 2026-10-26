@@ -60,6 +60,7 @@ class Config {
     const KEY_CUSTOM_CSS = 'custom_css';
 
     const KEY_GUEST_SIMPLIFIED_NAV = 'guest_simplified_nav';
+    const KEY_JUSTIFIED_GRID = 'justified_grid';
 
     private $defaults = array(
         self::KEY_FLUID_WIDTH => false,
@@ -104,6 +105,7 @@ class Config {
         self::KEY_CUSTOM_CSS => null,
         self::KEY_THUMBNAIL_NB_IMAGES => false,
         self::KEY_GUEST_SIMPLIFIED_NAV => true,
+        self::KEY_JUSTIFIED_GRID => true,
     );
 
     private $types = array(
@@ -149,6 +151,7 @@ class Config {
         self::KEY_CUSTOM_CSS => self::TYPE_FILE,
         self::KEY_THUMBNAIL_NB_IMAGES => self::TYPE_BOOL,
         self::KEY_GUEST_SIMPLIFIED_NAV => self::TYPE_BOOL,
+        self::KEY_JUSTIFIED_GRID => self::TYPE_BOOL,
     );
 
     private $config = array();

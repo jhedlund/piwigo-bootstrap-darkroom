@@ -222,6 +222,14 @@
                    {'Display number of images in breadcrumb'|@translate}
                 </label>
             </li>
+                <li>
+                    <label class="font-checkbox">
+                        <span class="icon-check"></span>
+                        <input type="checkbox" name="justified_grid"{if $theme_config->justified_grid} checked="checked"{/if}>
+                        {'Justified photo grid'|@translate}
+                    </label>
+                    <span class="info">{'With the Custom color theme, photos keep their full frame in even-height rows instead of cropped tiles.'|@translate}</span>
+                </li>
             </ul>
         </fieldset>
         <fieldset>

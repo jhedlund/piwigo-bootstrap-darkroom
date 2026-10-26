@@ -63,6 +63,7 @@ class ThemeController {
         $template->assign('theme_config', $this->config);
 
         $simple = $this->isSimpleNav();
+        $justified = $this->config->justified_grid && $this->config->bootstrap_theme === 'custom';
         if ($simple) {
             // Visitors have no grid/list buttons, so a list-view cookie left by a signed-in session in
             // the same browser would strand them in list view. Templates read $_COOKIE per request.
@@ -71,6 +72,10 @@ class ThemeController {
         $template->assign(array(
             'bd_simple_nav' => $simple,
             'bd_login_url' => $this->visitorLoginUrl(),
+            // Part of the Custom skin like the visitor layer, but for everyone.
+            'bd_justified_enabled' => $justified,
+            // List view keeps its own layout; index.tpl reloads when Grid is picked from it.
+            'bd_justified' => $justified && (!isset($_COOKIE['view']) || $_COOKIE['view'] != 'list'),
         ));
     }
 
