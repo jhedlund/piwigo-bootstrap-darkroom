@@ -20,7 +20,7 @@ $('#theImage img').bind('swipeleft swiperight', function (event) {
    if (event.type == 'swipeleft') {
        $('a#navNextPicture i').click();
    } else if (event.type == 'swiperight') {
-       $('a#navPrevPicture i').click(); 
+       $('a#navPrevPicture i').click();
    } else { 
        return;
    }

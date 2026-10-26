@@ -25,11 +25,8 @@
                 <div class="nav-breadcrumb d-inline-flex">{$SELECTED_TAGS_TEMPLATE}</div>
 {/if}
             </div>
-            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#secondary-navbar" aria-controls="secondary-navbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="fas fa-bars"></span>
-            </button>
-            <div class="navbar-collapse collapse justify-content-end" id="secondary-navbar">
-                <ul class="navbar-nav">
+{* Captured first so an empty menu renders no toggler. *}
+{capture name=bd_ctx_items}
 {if isset($SEARCH_IN_SET_ACTION) and $SEARCH_IN_SET_ACTION}
     <li id="cmdSearchInSet" class="nav-item">
         <a href="{$SEARCH_IN_SET_URL}" title="{'Search in this set'|translate}" class="pwg-state-default pwg-button nav-link"  rel="nofollow">
@@ -170,8 +167,17 @@
                         </a>
                     </li>
 {/if}
+{/capture}
+{if trim($smarty.capture.bd_ctx_items) != ''}
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#secondary-navbar" aria-controls="secondary-navbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="fas fa-bars"></span>
+            </button>
+            <div class="navbar-collapse collapse justify-content-end" id="secondary-navbar">
+                <ul class="navbar-nav">
+{$smarty.capture.bd_ctx_items}
                 </ul>
             </div>
+{/if}
         </div>
     </nav>
 {/if}

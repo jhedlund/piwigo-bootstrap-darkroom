@@ -326,7 +326,7 @@
                         <input type="checkbox" name="guest_simplified_nav"{if $theme_config->guest_simplified_nav} checked="checked"{/if}>
                         {'Simplified navigation for visitors'|@translate}
                     </label>
-                    <span class="info">{'Everyone except administrators gets a clean navigation bar: no menus, search or sort and size controls, labeled Slideshow and Download buttons, a "Show more" button instead of page numbers, and a back link instead of the full album path.'|@translate}</span>
+                    <span class="info">{'With the Custom color theme, visitors (guests and share-link users) get a clean navigation bar: no menus, search or sort and size controls, labeled Slideshow and Download buttons, a "Show more" button instead of page numbers, and a back link instead of the full album path.'|@translate}</span>
                 </li>
             </ul>
         </fieldset>

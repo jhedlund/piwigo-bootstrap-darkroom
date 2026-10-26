@@ -62,10 +62,8 @@ class ThemeController {
 
         $template->assign('theme_config', $this->config);
 
-        // Share-link visitors are the audience here, and ShareAlbum logs them in as per-share users,
-        // so "visitor" means "not an administrator" rather than "not logged in".
         $template->assign(array(
-            'bd_simple_nav' => $this->config->guest_simplified_nav && !is_admin(),
+            'bd_simple_nav' => $this->isSimpleNav(),
             'bd_is_guest' => is_a_guest(),
         ));
     }
@@ -82,12 +80,35 @@ class ThemeController {
         unset($mbMenu->data['comments']);
     }
 
+    // The visitor layer belongs to the Custom skin: nothing changes on deploy until Color theme ->
+    // Custom is selected, and switching back is a complete rollback.
+    private function isSimpleNav() {
+        return $this->config->guest_simplified_nav
+            && $this->config->bootstrap_theme === 'custom'
+            && $this->isVisitor();
+    }
+
+    // Guests, plus ShareAlbum share-link visitors: that plugin logs them in as auto-created share_*
+    // users. Every other signed-in account keeps the full controls.
+    private function isVisitor() {
+        global $user;
+
+        if (is_a_guest()) {
+            return true;
+        }
+        if (pwg_get_session_var('sharealbum_guest')) {
+            return true;
+        }
+        return defined('SHAREALBUM_USER_PREFIX') && isset($user['username'])
+            && strpos($user['username'], SHAREALBUM_USER_PREFIX) === 0;
+    }
+
     // Piwigo's default photo-page size is medium (396x594 for a portrait), small and soft on a
     // desktop screen. Visitors have no photo sizes menu, so give them a sharp default instead.
     public function setPictureDefaultSize() {
         global $conf;
 
-        if (!$this->config->guest_simplified_nav || is_admin()) {
+        if (!$this->isSimpleNav()) {
             return;
         }
         $type = get_device() == 'mobile' ? IMG_LARGE : IMG_XXLARGE;
