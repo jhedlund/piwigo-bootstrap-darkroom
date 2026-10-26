@@ -13,7 +13,12 @@
 {assign var=rwidth value=$width}
 {assign var=rheight value=$height}
 {/if}
+{if $bd_justified}
+{* Justified rows show the whole frame: the uncropped medium size, which the lightbox data uses too. *}
+{define_derivative name='derivative_params' type=IMG_MEDIUM}
+{else}
 {define_derivative name='derivative_params' width=$width height=$height crop=true}
+{/if}
 {assign var=idx value=0+$START_ID}
 {foreach from=$thumbnails item=thumbnail}
 {assign var=derivative value=$pwg->derivative($derivative_params, $thumbnail.src_image)}
@@ -22,7 +27,8 @@
 {combine_script id='thumbnails.loader' path='themes/default/js/thumbnails.loader.js' require='jquery.ajaxmanager' load='footer'}
 {/if}
 {include file="grid_classes.tpl" width=$rwidth height=$rheight}
-<div class="col-outer {if isset($smarty.cookies.view) and $smarty.cookies.view == 'list'}col-12{else}{$col_class}{/if}" data-grid-classes="{$col_class}">
+{if $bd_justified}{assign var=jsize value=$derivative->get_size()}{/if}
+<div class="col-outer {if isset($smarty.cookies.view) and $smarty.cookies.view == 'list'}col-12{else}{$col_class}{/if}" data-grid-classes="{$col_class}"{if $bd_justified && !empty($jsize)} data-w="{$jsize[0]}" data-h="{$jsize[1]}"{/if}>
     <div class="card card-thumbnail {if isset($thumbnail.path_ext)}path-ext-{$thumbnail.path_ext}{/if} {if isset($thumbnail.file_ext)}file-ext-{$thumbnail.file_ext}{/if}">
       <div class="h-100">
         <a href="{$thumbnail.URL}" data-index="{$idx}" class="ripple{if isset($smarty.cookies.view) and $smarty.cookies.view != 'list'} d-block{/if}">

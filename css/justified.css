@@ -1,0 +1,31 @@
+/* Justified photo rows (justified_grid), sized by js/justified.js. Skin-independent. */
+#thumbnails.bd-justified {
+  visibility: hidden;
+}
+
+#thumbnails.bd-justified.bd-justified-ready {
+  visibility: visible;
+}
+
+#content #thumbnails.bd-justified-on {
+  margin: 0;
+  gap: 6px;
+}
+
+/* theme.css animates .col-outer (transition: all .5s), which would slide every tile on each relayout. */
+#content #thumbnails.bd-justified-on > .col-outer {
+  padding: 0;
+  margin: 0;
+  transition: none;
+}
+
+#thumbnails.bd-justified-on .card-thumbnail {
+  border: 0;
+  border-radius: 8px;
+}
+
+#thumbnails.bd-justified-on .card-thumbnail img.thumb-img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
