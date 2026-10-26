@@ -1,4 +1,7 @@
-<nav class="mt-5" aria-label="Page navigation">
+{if !empty($bd_show_more)}
+{combine_script id='bd.show_more' require='jquery' path='themes/bootstrap_darkroom/js/show_more.js' load='footer'}
+{/if}
+<nav class="mt-5{if !empty($bd_show_more)} bd-pager{/if}" aria-label="Page navigation"{if !empty($bd_show_more) && isset($navbar.URL_NEXT)} data-bd-next="{$navbar.URL_NEXT}"{/if}>
     <ul class="pagination justify-content-center">
 {if isset($navbar.URL_FIRST)}
         <li class="page-item"><a class="page-link" href="{$navbar.URL_FIRST}{if $fragment}#{$fragment}{/if}" rel="first"><i class="fas fa-fast-backward" title="{'First'|@translate}"></i></a></li>

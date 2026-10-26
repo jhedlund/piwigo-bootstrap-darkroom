@@ -1,0 +1,448 @@
+/* Custom skin overlay (fork), hand-maintained. header.tpl loads it after css/custom/bootstrap.min.css
+   whenever Color theme -> Custom is selected. theme.css is combined at the same order and lands after
+   this file, so rules overriding theme.css carry an extra selector to win on specificity.
+   .bd-simple-nav / body.bd-simple only exist for visitors (guest_simplified_nav, see themecontroller). */
+
+:root {
+  --bd-bg: #101214;
+  --bd-surface: #17191d;
+  --bd-surface-2: #1f2226;
+  --bd-hairline: rgba(255, 255, 255, .08);
+  --bd-text: #e8eaed;
+  --bd-muted: #9aa0a6;
+  --bd-accent: #8ab4f8;
+  --bd-radius: .625rem;
+  --bd-nav-bg: rgba(16, 18, 20, .82);
+}
+
+/* Future light mode: override the tokens above here. */
+@media (prefers-color-scheme: light) {
+}
+
+html {
+  background: var(--bd-bg);
+}
+
+h1, h2, h3, .h1, .h2, .h3 {
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+
+/* ---------- Navbars: translucent, blurred ---------- */
+
+.navbar.navbar-main,
+.navbar.navbar-contextual {
+  background-color: var(--bd-nav-bg) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: none;
+  border-bottom: 1px solid var(--bd-hairline);
+}
+
+.navbar.navbar-contextual {
+  margin-bottom: 1rem;
+}
+
+.navbar-main .navbar-brand {
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+
+/* Contextual bar row layout (everyone): the breadcrumb takes the free space and truncates, so the
+   menu toggler stays on the same row instead of wrapping under it. */
+.navbar.navbar-contextual > .container,
+.navbar.navbar-contextual > .container-fluid {
+  flex-wrap: wrap;
+}
+
+.navbar.navbar-contextual .navbar-brand {
+  flex: 1 1 0%;
+  min-width: 0;
+  max-width: none;
+  margin-right: .5rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.navbar.navbar-contextual .navbar-toggler {
+  flex: 0 0 auto;
+}
+
+.navbar.navbar-contextual .nav-breadcrumb {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* ---------- Visitor contextual bar ---------- */
+
+.navbar.bd-simple-nav > .container,
+.navbar.bd-simple-nav > .container-fluid {
+  flex-wrap: nowrap;
+}
+
+.bd-simple-nav .navbar-brand {
+  display: flex;
+  align-items: center;
+  padding-top: .25rem;
+  padding-bottom: .25rem;
+}
+
+/* theme.css turns the first breadcrumb link (normally Home) into a house glyph; visitors have no
+   Home crumb, so their first link is a real album name. */
+.bd-simple-nav .navbar-brand a:first-child {
+  font-size: inherit;
+}
+
+.bd-simple-nav .navbar-brand a:first-child:before {
+  content: none;
+}
+
+.bd-simple-nav .bd-back {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 100%;
+  margin-right: .5rem;
+}
+
+.bd-simple-nav .bd-back .fa-chevron-left {
+  font-size: .9em;
+  padding: .25rem .5rem .25rem 0;
+}
+
+.bd-simple-nav .bd-current {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#thePicturePage .bd-simple-nav .bd-back {
+  flex: 1 1 auto;
+}
+
+/* Desktop path: ancestors give up their width first, the current album keeps its full name. */
+.bd-simple-nav .nav-breadcrumb {
+  display: flex;
+  min-width: 0;
+}
+
+.bd-simple-nav .nav-breadcrumb > .nav-breadcrumb-item {
+  flex: 0 1 auto;
+  min-width: 1.5em;
+  max-width: none;
+}
+
+.bd-simple-nav .nav-breadcrumb > .nav-breadcrumb-item:last-child {
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+
+.bd-simple-nav .bd-actions {
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.bd-simple-nav .bd-actions .nav-link {
+  padding: .5rem .6rem;
+  white-space: nowrap;
+}
+
+.bd-simple-nav .bd-actions .nav-item.active .nav-link {
+  color: var(--bd-accent);
+}
+
+.bd-simple-nav .bd-actions .dropdown-menu {
+  position: absolute;
+}
+
+.bd-simple-nav .bd-label {
+  margin-left: .4rem;
+}
+
+@media (max-width: 991.98px) {
+  .bd-simple-nav .bd-label {
+    display: none;
+  }
+}
+
+/* ---------- Cards and tiles ---------- */
+
+.card {
+  background-color: var(--bd-surface);
+  border: 1px solid var(--bd-hairline);
+  border-radius: var(--bd-radius);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+body .content-grid .col-outer {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 4px;
+}
+
+.content-grid .card-thumbnail {
+  position: relative;
+  transition: transform .15s ease, border-color .15s ease;
+}
+
+@media (hover: hover) {
+  .content-grid .card-thumbnail:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, .25);
+  }
+}
+
+.content-grid .card-thumbnail .card-img-top {
+  border-radius: 0;
+}
+
+/* Grid view: the list-view caption must not leak a grey strip under each photo. */
+.content-grid .card-thumbnail .card-body.list-view-only {
+  display: none;
+}
+
+/* Photo captions, when enabled, become a hover overlay. */
+.content-grid #thumbnails .card-thumbnail .card-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: .5rem .75rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .78));
+  opacity: 0;
+  transition: opacity .15s ease;
+  pointer-events: none;
+}
+
+.content-grid #thumbnails .card-thumbnail:hover .card-body {
+  opacity: 1;
+}
+
+.content-grid #thumbnails .card-thumbnail .card-body .card-title,
+.content-grid #thumbnails .card-thumbnail .card-body .card-title a {
+  color: #fff;
+  margin: 0;
+}
+
+/* Album covers: name and photo count on the cover photo. equalHeights() writes an inline height on
+   .card-body, hence !important. Album tiles live in a .row of their own, photo tiles in #thumbnails. */
+.content-grid .row:not(#thumbnails) > .col-outer {
+  margin-top: 0 !important;
+  padding: 8px;
+}
+
+.content-grid .row:not(#thumbnails) > .col-outer .card-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: auto !important;
+  padding: 2.5rem .85rem 1.85rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .82));
+  pointer-events: none;
+}
+
+.content-grid .row:not(#thumbnails) > .col-outer .card-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.content-grid .row:not(#thumbnails) > .col-outer .card-title a {
+  color: #fff;
+  pointer-events: auto;
+}
+
+.content-grid .row:not(#thumbnails) > .col-outer .card-text {
+  font-size: .8rem;
+  color: rgba(232, 234, 237, .78);
+}
+
+.content-grid .row:not(#thumbnails) > .col-outer .card-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 .85rem .55rem;
+  background: none;
+  color: rgba(232, 234, 237, .78) !important;
+  font-size: .8rem;
+  pointer-events: none;
+}
+
+/* ---------- Phone: 2-up photo grid ---------- */
+
+@media (max-width: 575.98px) {
+  .content-grid #thumbnails .col-outer.col-12 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .content-grid #thumbnails .card-thumbnail .card-body {
+    display: none;
+  }
+}
+
+/* ---------- Pagination and "Show more" ---------- */
+
+.pagination .page-link {
+  border-radius: .5rem;
+  margin: 0 2px;
+}
+
+.bd-show-more {
+  display: flex;
+  justify-content: center;
+  margin: 2.5rem 0 1.5rem;
+}
+
+.bd-show-more-btn {
+  background: var(--bd-surface);
+  border: 1px solid var(--bd-hairline);
+  color: var(--bd-text);
+  border-radius: 999px;
+  padding: .6rem 1.6rem;
+  font-size: .95rem;
+}
+
+.bd-show-more-btn:hover,
+.bd-show-more-btn:focus {
+  background: var(--bd-surface-2);
+  color: #fff;
+}
+
+/* ---------- Photo page ---------- */
+
+body #theImage img {
+  max-height: 70vh;
+  width: auto;
+  border-radius: 6px;
+}
+
+body #theImage > img,
+body #theImage .bd-stage > img {
+  box-shadow: none;
+}
+
+.bd-stage {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
+  vertical-align: top;
+}
+
+.bd-overlay {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(16, 18, 20, .6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 50%;
+  line-height: 1;
+  opacity: .9;
+  transition: opacity .15s ease, background-color .15s ease;
+}
+
+.bd-overlay:hover,
+.bd-overlay:focus {
+  color: #fff;
+  opacity: 1;
+  background: rgba(16, 18, 20, .8);
+  text-decoration: none;
+}
+
+.bd-overlay-prev,
+.bd-overlay-next {
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  font-size: 20px;
+}
+
+.bd-overlay-prev {
+  left: 12px;
+}
+
+.bd-overlay-next {
+  right: 12px;
+}
+
+.bd-overlay-fullscreen {
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+@media (max-width: 575.98px) {
+  .bd-overlay-prev,
+  .bd-overlay-next {
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    font-size: 16px;
+  }
+
+  .bd-overlay-prev {
+    left: 8px;
+  }
+
+  .bd-overlay-next {
+    right: 8px;
+  }
+
+  .bd-overlay-fullscreen {
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Visitors don't need EXIF or file information. */
+body.bd-simple #card-informations,
+body.bd-simple #card-metadata {
+  display: none;
+}
+
+/* Filmstrip: the gap is slide padding so slick's track math stays intact. */
+body #thumbnailCarousel .slick-slide {
+  padding: 0 3px;
+}
+
+body #thumbnailCarousel .slick-slide img {
+  border-radius: 6px;
+  box-shadow: none;
+  opacity: .6;
+  transition: opacity .15s ease;
+}
+
+body #thumbnailCarousel .slick-slide:hover img {
+  opacity: .85;
+}
+
+body #thumbnailCarousel .thumbnail-active > a > img {
+  opacity: 1;
+  border: 0;
+  box-shadow: 0 0 0 2px var(--bd-accent);
+}
+
+/* ---------- Footer ---------- */
+
+.copyright {
+  color: var(--bd-muted);
+  font-size: .85rem;
+  padding: 1.5rem 0;
+}

@@ -96,8 +96,7 @@ $(function() {
         render();
     };
 
-    var enter = function() {
-        selecting = true;
+    var recount = function() {
         cap = 0;
         cards().each(function() {
             var id = imageidOf($(this));
@@ -106,6 +105,10 @@ $(function() {
             if (on) cap++;
         });
         cap = Math.min(cap, CEILING);
+    };
+    var enter = function() {
+        selecting = true;
+        recount();
         $('body').addClass('multi-select');
         $('#btn-select').addClass('active');
         $('#secondary-navbar.show').collapse('hide');
@@ -222,5 +225,11 @@ $(function() {
     $bar.find('.multi-dl-all').on('click', selectAll);
     $bar.find('.multi-dl-close').on('click', exit);
     $go.on('click', download);
+    /* "Show more" can append tiles mid-selection: the cap grows with the cards, up to CEILING. */
+    $(document).on('bd:tiles-appended', function() {
+        if (!selecting) return;
+        recount();
+        render();
+    });
 });
 {/strip}{/footer_script}

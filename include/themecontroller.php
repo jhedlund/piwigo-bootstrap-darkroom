@@ -30,6 +30,11 @@ class ThemeController {
         add_event_handler('loc_after_page_header', array($this, 'stripBreadcrumbs'));
         add_event_handler('format_exif_data', array($this, 'exifReplacements'));
         add_event_handler('loc_end_picture', array($this, 'registerPictureTemplates'), 1000);
+        add_event_handler('loc_begin_picture', array($this, 'setPictureDefaultSize'));
+        // After plugins that rewrite breadcrumb URLs (UnlistedAlbum: neutral + 10), before
+        // registerPictureTemplates renders picture_nav.tpl.
+        add_event_handler('loc_end_index', array($this, 'assignBackLink'), EVENT_HANDLER_PRIORITY_NEUTRAL + 50);
+        add_event_handler('loc_end_picture', array($this, 'assignBackLink'), 999);
         add_event_handler('loc_begin_index_thumbnails', array($this, 'returnPageStart'));
 
         if ($this->config->slick_enabled === true || $this->config->photoswipe === true) {
@@ -56,6 +61,26 @@ class ThemeController {
         }
 
         $template->assign('theme_config', $this->config);
+
+        $simple = $this->isSimpleNav();
+        if ($simple) {
+            // Visitors have no grid/list buttons, so a list-view cookie left by a signed-in session in
+            // the same browser would strand them in list view. Templates read $_COOKIE per request.
+            unset($_COOKIE['view']);
+        }
+        $template->assign(array(
+            'bd_simple_nav' => $simple,
+            'bd_login_url' => $this->visitorLoginUrl(),
+        ));
+    }
+
+    // Visitors always get a Login link. A ShareAlbum share identity is signed in, so it goes through
+    // ShareAlbum's own switch (it logs the share user out, then opens the login page).
+    private function visitorLoginUrl() {
+        if (!is_a_guest() && defined('SHAREALBUM_URL_ACTION') && defined('SHAREALBUM_URL_ACTION_LOGIN')) {
+            return get_root_url() . 'index.php?' . SHAREALBUM_URL_ACTION . '=' . SHAREALBUM_URL_ACTION_LOGIN;
+        }
+        return get_root_url() . 'identification.php';
     }
 
     public function showUpgradeWarning() {
@@ -68,6 +93,43 @@ class ThemeController {
 
         $mbMenu = $menu->get_block('mbMenu');
         unset($mbMenu->data['comments']);
+    }
+
+    // The visitor layer belongs to the Custom skin: nothing changes on deploy until Color theme ->
+    // Custom is selected, and switching back is a complete rollback.
+    private function isSimpleNav() {
+        return $this->config->guest_simplified_nav
+            && $this->config->bootstrap_theme === 'custom'
+            && $this->isVisitor();
+    }
+
+    // Guests, plus ShareAlbum share-link visitors: that plugin logs them in as auto-created share_*
+    // users. Every other signed-in account keeps the full controls.
+    private function isVisitor() {
+        global $user;
+
+        if (is_a_guest()) {
+            return true;
+        }
+        if (pwg_get_session_var('sharealbum_guest')) {
+            return true;
+        }
+        return defined('SHAREALBUM_USER_PREFIX') && isset($user['username'])
+            && strpos($user['username'], SHAREALBUM_USER_PREFIX) === 0;
+    }
+
+    // Piwigo's default photo-page size is medium (396x594 for a portrait), small and soft on a
+    // desktop screen. Visitors have no photo sizes menu, so give them a sharp default instead.
+    public function setPictureDefaultSize() {
+        global $conf;
+
+        if (!$this->isSimpleNav()) {
+            return;
+        }
+        $type = get_device() == 'mobile' ? IMG_LARGE : IMG_XXLARGE;
+        if (array_key_exists($type, \ImageStdParams::get_defined_type_map())) {
+            $conf['derivative_default_size'] = $type;
+        }
     }
 
     public function returnPageStart() {
@@ -158,12 +220,38 @@ class ThemeController {
             if ($page['section'] == 'recent_cats' or $page['section'] == 'favorites') {
                 $title = preg_replace('/<\/a>([a-zA-Z0-9]+)/', '</a><a class="nav-breadcrumb-item" href="' . make_index_url(array('section' => $page['section'])) . '">${1}', $title) . '</a>';
             }
+            if ($template->get_template_vars('bd_simple_nav')) {
+                // Visitors lose the Home crumb: on a share link it is a dead end.
+                $home = preg_quote($template->get_template_vars('U_HOME'), '/');
+                $title = preg_replace('/^<a class="nav-breadcrumb-item" href="' . $home . '">[^<]*<\/a>/', '', $title);
+            }
             if (empty($section_title)) {
                 $template->assign('TITLE', $title);
             } else {
                 $template->assign('SECTION_TITLE', $title);
             }
         }
+    }
+
+    // The compact "< Album" back link: the parent album's link and the current album's name, read
+    // from the breadcrumb once plugins have finished rewriting its URLs.
+    public function assignBackLink() {
+        global $template;
+
+        if (!$template->get_template_vars('bd_simple_nav')) {
+            return;
+        }
+        $title = $template->get_template_vars('SECTION_TITLE');
+        if (empty($title)) {
+            $title = $template->get_template_vars('TITLE');
+        }
+        preg_match_all('/<a class="nav-breadcrumb-item" href="([^"]*)"[^>]*>(.*?)<\/a>/s', (string)$title, $crumbs, PREG_SET_ORDER);
+        $count = count($crumbs);
+        $template->assign(array(
+            'bd_crumb_parent_url' => $count > 1 ? $crumbs[$count - 2][1] : null,
+            'bd_crumb_last_url' => $count > 0 ? $crumbs[$count - 1][1] : null,
+            'bd_crumb_last_name' => $count > 0 ? $crumbs[$count - 1][2] : null,
+        ));
     }
 
     public function getAllThumbnailsInCategory()

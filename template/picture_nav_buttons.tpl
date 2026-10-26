@@ -1,3 +1,5 @@
+{* Visitors get these as overlays on the photo (picture.tpl); the keyboard handler below stays. *}
+{if empty($bd_stage)}
     <div id="navigationButtons" class="col-12 py-2">
 {if $DISPLAY_NAV_BUTTONS or isset($slideshow)}
 {if isset($slideshow)}
@@ -89,6 +91,7 @@
 {/if}{/strip}-->*}
 {/if}
     </div>
+{/if}
 {strip}
 {footer_script}
 document.onkeydown = function(e){ldelim}
