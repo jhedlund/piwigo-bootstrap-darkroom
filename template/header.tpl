@@ -104,7 +104,7 @@
 {/if}
 </head>
 
-<body id="{$BODY_ID}" class="{foreach from=$BODY_CLASSES item=class}{$class} {/foreach}"  data-infos='{$BODY_DATA}'>
+<body id="{$BODY_ID}" class="{foreach from=$BODY_CLASSES item=class}{$class} {/foreach}{if $bd_simple_nav}bd-simple{/if}"  data-infos='{$BODY_DATA}'>
 
 <div id="wrapper">
 {if isset($MENUBAR)}
@@ -115,6 +115,7 @@
 {else}
                 <a class="navbar-brand mr-auto" href="{$U_HOME}">{$GALLERY_TITLE}</a>
 {/if}
+{if !$bd_simple_nav}
                 <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-menubar" aria-controls="navbar-menubar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="fas fa-bars"></span>
                 </button>
@@ -139,6 +140,7 @@ $(document).ready(function() {
 {/if}
 {$MENUBAR}
                 </div>
+{/if}
             </div>
         </nav>
 {if $theme_config->page_header == 'fancy'}

@@ -59,6 +59,8 @@ class Config {
 
     const KEY_CUSTOM_CSS = 'custom_css';
 
+    const KEY_GUEST_SIMPLIFIED_NAV = 'guest_simplified_nav';
+
     private $defaults = array(
         self::KEY_FLUID_WIDTH => false,
         self::KEY_FLUID_WIDTH_COL_XXL => true,
@@ -101,6 +103,7 @@ class Config {
         self::KEY_TAG_CLOUD_TYPE => 'basic',
         self::KEY_CUSTOM_CSS => null,
         self::KEY_THUMBNAIL_NB_IMAGES => false,
+        self::KEY_GUEST_SIMPLIFIED_NAV => true,
     );
 
     private $types = array(
@@ -145,6 +148,7 @@ class Config {
         self::KEY_TAG_CLOUD_TYPE => self::TYPE_STRING,
         self::KEY_CUSTOM_CSS => self::TYPE_FILE,
         self::KEY_THUMBNAIL_NB_IMAGES => self::TYPE_BOOL,
+        self::KEY_GUEST_SIMPLIFIED_NAV => self::TYPE_BOOL,
     );
 
     private $config = array();
@@ -209,7 +213,9 @@ class Config {
                 case self::TYPE_STRING:
                 case self::TYPE_BOOL:
                 case self::TYPE_NUM:
-                    return $this->config[$key];
+                    // Keys added without a CONF_VERSION bump are missing from saved configs until the
+                    // admin form is saved once; fall back to the default rather than null.
+                    return array_key_exists($key, $this->config) ? $this->config[$key] : $this->defaults[$key];
                 case self::TYPE_FILE:
                     return $this->loadFile($key);
             }

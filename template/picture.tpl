@@ -10,6 +10,7 @@
 <div id="main-picture-container" class="container{if $theme_config->fluid_width}-fluid{/if}">
 {include file='infos_errors.tpl'}
 
+{assign var=bd_stage value=$bd_simple_nav && !isset($slideshow) && !preg_match("/(mp4|m4v|pdf)$/i", $current.path)}
   <div class="row justify-content-center">
     {include file='picture_nav_buttons.tpl'|@get_extent:'picture_nav_buttons'}
   </div>
@@ -17,9 +18,9 @@
 {footer_script require="jquery"}{strip}
 $('#theImage img').bind('swipeleft swiperight', function (event) {
    if (event.type == 'swipeleft') {
-       $('#navigationButtons a#navNextPicture i').click();
+       $('a#navNextPicture i').click();
    } else if (event.type == 'swiperight') {
-       $('#navigationButtons a#navPrevPicture i').click(); 
+       $('a#navPrevPicture i').click(); 
    } else { 
        return;
    }
@@ -28,7 +29,26 @@ $('#theImage img').bind('swipeleft swiperight', function (event) {
 {/if}
 
   <div id="theImage" class="row d-block justify-content-center mb-3">
+{if $bd_stage}
+    {* Visitors: prev/next and fullscreen sit on the photo instead of in a row above it. *}
+    <div class="bd-stage">
     {$ELEMENT_CONTENT}
+{if isset($previous)}
+      <a href="{$previous.U_IMG}" title="{'Previous'|@translate} : {$previous.TITLE_ESC}" id="navPrevPicture" class="bd-overlay bd-overlay-prev"><i class="fas fa-chevron-left" aria-hidden="true"></i></a>
+{/if}
+{if isset($next)}
+{html_head}
+<link rel="prerender" href="{$next.U_IMG}">
+{/html_head}
+      <a href="{$next.U_IMG}" title="{'Next'|@translate} : {$next.TITLE_ESC}" id="navNextPicture" class="bd-overlay bd-overlay-next"><i class="fas fa-chevron-right" aria-hidden="true"></i></a>
+{/if}
+{if $theme_config->photoswipe && !empty($thumbnails)}
+      <a href="javascript:;" title="{'Fullscreen'|@translate}" id="startPhotoSwipe" class="bd-overlay bd-overlay-fullscreen"><i class="fas fa-expand" aria-hidden="true"></i></a>
+{/if}
+    </div>
+{else}
+    {$ELEMENT_CONTENT}
+{/if}
   </div>
 
 {if $theme_config->picture_info == 'sidebar'}

@@ -6,6 +6,9 @@
 {/if}
 {if !empty($PLUGIN_INDEX_CONTENT_BEFORE)}{$PLUGIN_INDEX_CONTENT_BEFORE}{/if}
 
+{if $bd_simple_nav}
+{include file='_simple_nav_index.tpl'}
+{else}
     <nav class="navbar navbar-expand-lg navbar-contextual {$theme_config->navbar_contextual_style} {$theme_config->navbar_contextual_bg}{if $theme_config->page_header == 'fancy' && $theme_config->page_header_both_navs} navbar-transparent navbar-sm{/if} sticky-top mb-2">
         <div class="container{if $theme_config->fluid_width}-fluid{/if}">
             <div class="navbar-brand mr-auto">
@@ -171,6 +174,7 @@
             </div>
         </div>
     </nav>
+{/if}
 
 {include file='infos_errors.tpl'}
 
@@ -326,19 +330,21 @@ function setupPhotoSwipe() {
          });
       }
    });
+}
 
+{if $theme_config->thumbnail_linkto == 'photoswipe' || ($theme_config->thumbnail_linkto == 'photoswipe_mobile_only' && get_device() != 'desktop')}
+$(document).ready(function() {
+   setupPhotoSwipe();
+   /* Outside setupPhotoSwipe, which re-runs for appended tiles: re-running this would reopen the lightbox. */
    if (window.location.hash) {
         const pidMatch = /(#|&)pid=(\d+)(&|$)/.exec(window.location.hash);
         if (pidMatch) {
             startPhotoSwipe(parseInt(pidMatch[2]) - 1);
         }
    }
-}
-
-{if $theme_config->thumbnail_linkto == 'photoswipe' || ($theme_config->thumbnail_linkto == 'photoswipe_mobile_only' && get_device() != 'desktop')}
-$(document).ready(function() {
-   setupPhotoSwipe();
 });
+/* "Show more" appends the next page's tiles. */
+$(document).on('bd:tiles-appended', setupPhotoSwipe);
 
 {if isset($loaded_plugins['rv_tscroller'])}
 $(document).ajaxComplete(function() {
@@ -384,7 +390,7 @@ $('.card-thumbnail').find('img[src*="pwg_representative"]').each(function() {
     {include file='navigation_bar.tpl' fragment="content"|@get_extent:'navbar' navbar=$cats_navbar}
 {/if}
 {if !empty($thumb_navbar) && !isset($loaded_plugins['rv_tscroller'])}
-    {include file='navigation_bar.tpl' fragment="content"|@get_extent:'navbar' navbar=$thumb_navbar}
+    {include file='navigation_bar.tpl' fragment="content"|@get_extent:'navbar' navbar=$thumb_navbar bd_show_more=$bd_simple_nav}
 {/if}
 </div>
 {/if}

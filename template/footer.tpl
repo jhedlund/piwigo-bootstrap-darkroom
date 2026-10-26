@@ -11,6 +11,9 @@
                 *}
                 {'Powered by'|@translate}	<a href="{$PHPWG_URL}" class="Piwigo">Piwigo</a>
 {$VERSION}
+{if $bd_simple_nav}
+                | {if $bd_is_guest}<a href="{$ROOT_URL}identification.php" rel="nofollow">{'Login'|@translate}</a>{else}<a href="{$ROOT_URL}?act=logout">{'Logout'|@translate}</a>{/if}
+{/if}
 {if isset($CONTACT_MAIL)}
                 | <a href="mailto:{$CONTACT_MAIL}?subject={'A comment on your site'|@translate|@escape:url}">{'Contact webmaster'|@translate}</a>
 {/if}

@@ -30,6 +30,11 @@ class ThemeController {
         add_event_handler('loc_after_page_header', array($this, 'stripBreadcrumbs'));
         add_event_handler('format_exif_data', array($this, 'exifReplacements'));
         add_event_handler('loc_end_picture', array($this, 'registerPictureTemplates'), 1000);
+        add_event_handler('loc_begin_picture', array($this, 'setPictureDefaultSize'));
+        // After plugins that rewrite breadcrumb URLs (UnlistedAlbum: neutral + 10), before
+        // registerPictureTemplates renders picture_nav.tpl.
+        add_event_handler('loc_end_index', array($this, 'assignBackLink'), EVENT_HANDLER_PRIORITY_NEUTRAL + 50);
+        add_event_handler('loc_end_picture', array($this, 'assignBackLink'), 999);
         add_event_handler('loc_begin_index_thumbnails', array($this, 'returnPageStart'));
 
         if ($this->config->slick_enabled === true || $this->config->photoswipe === true) {
@@ -56,6 +61,13 @@ class ThemeController {
         }
 
         $template->assign('theme_config', $this->config);
+
+        // Share-link visitors are the audience here, and ShareAlbum logs them in as per-share users,
+        // so "visitor" means "not an administrator" rather than "not logged in".
+        $template->assign(array(
+            'bd_simple_nav' => $this->config->guest_simplified_nav && !is_admin(),
+            'bd_is_guest' => is_a_guest(),
+        ));
     }
 
     public function showUpgradeWarning() {
@@ -68,6 +80,20 @@ class ThemeController {
 
         $mbMenu = $menu->get_block('mbMenu');
         unset($mbMenu->data['comments']);
+    }
+
+    // Piwigo's default photo-page size is medium (396x594 for a portrait), small and soft on a
+    // desktop screen. Visitors have no photo sizes menu, so give them a sharp default instead.
+    public function setPictureDefaultSize() {
+        global $conf;
+
+        if (!$this->config->guest_simplified_nav || is_admin()) {
+            return;
+        }
+        $type = get_device() == 'mobile' ? IMG_LARGE : IMG_XXLARGE;
+        if (array_key_exists($type, \ImageStdParams::get_defined_type_map())) {
+            $conf['derivative_default_size'] = $type;
+        }
     }
 
     public function returnPageStart() {
@@ -158,12 +184,38 @@ class ThemeController {
             if ($page['section'] == 'recent_cats' or $page['section'] == 'favorites') {
                 $title = preg_replace('/<\/a>([a-zA-Z0-9]+)/', '</a><a class="nav-breadcrumb-item" href="' . make_index_url(array('section' => $page['section'])) . '">${1}', $title) . '</a>';
             }
+            if ($template->get_template_vars('bd_simple_nav')) {
+                // Visitors lose the Home crumb: on a share link it is a dead end.
+                $home = preg_quote($template->get_template_vars('U_HOME'), '/');
+                $title = preg_replace('/^<a class="nav-breadcrumb-item" href="' . $home . '">[^<]*<\/a>/', '', $title);
+            }
             if (empty($section_title)) {
                 $template->assign('TITLE', $title);
             } else {
                 $template->assign('SECTION_TITLE', $title);
             }
         }
+    }
+
+    // The compact "< Album" back link: the parent album's link and the current album's name, read
+    // from the breadcrumb once plugins have finished rewriting its URLs.
+    public function assignBackLink() {
+        global $template;
+
+        if (!$template->get_template_vars('bd_simple_nav')) {
+            return;
+        }
+        $title = $template->get_template_vars('SECTION_TITLE');
+        if (empty($title)) {
+            $title = $template->get_template_vars('TITLE');
+        }
+        preg_match_all('/<a class="nav-breadcrumb-item" href="([^"]*)"[^>]*>(.*?)<\/a>/s', (string)$title, $crumbs, PREG_SET_ORDER);
+        $count = count($crumbs);
+        $template->assign(array(
+            'bd_crumb_parent_url' => $count > 1 ? $crumbs[$count - 2][1] : null,
+            'bd_crumb_last_url' => $count > 0 ? $crumbs[$count - 1][1] : null,
+            'bd_crumb_last_name' => $count > 0 ? $crumbs[$count - 1][2] : null,
+        ));
     }
 
     public function getAllThumbnailsInCategory()

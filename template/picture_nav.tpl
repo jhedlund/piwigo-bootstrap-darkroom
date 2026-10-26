@@ -1,3 +1,6 @@
+{if $bd_simple_nav}
+{include file='_simple_nav_picture.tpl'}
+{else}
 <nav class="navbar navbar-contextual navbar-expand-lg {$theme_config->navbar_contextual_style} {$theme_config->navbar_contextual_bg} sticky-top mb-2">
     <div class="container{if $theme_config->fluid_width}-fluid{/if}">
         <div class="navbar-brand">
@@ -118,3 +121,4 @@
         </div>
     </div>
 </nav>
+{/if}
