@@ -285,8 +285,26 @@ $(document).ready(function() {
 
 {if !empty($THUMBNAILS)}
         <!-- Start of thumbnails -->
-        <div id="thumbnails" class="row">{$THUMBNAILS}</div>
+{assign var=bd_justified_on value=$bd_justified && !isset($GThumb) && !isset($GDThumb)}
+        <div id="thumbnails" class="row{if $bd_justified_on} bd-justified{/if}">{$THUMBNAILS}</div>
+{if $bd_justified_on}
+{combine_css path='themes/bootstrap_darkroom/css/justified.css' order=100}
+{combine_script id='bd.justified' require='jquery' path='themes/bootstrap_darkroom/js/justified.js' load='footer'}
+        <noscript><style>#thumbnails.bd-justified { visibility: visible; }</style></noscript>
+{else}
 {footer_script require='jquery'}{literal}$(document).ready(function(){$('#content img').load(function(){$('#content .col-inner').equalHeights()})});{/literal}{/footer_script}
+{if $bd_justified_enabled && !isset($GThumb) && !isset($GDThumb)}
+{* Rendered in list view, so the tiles lack the uncropped images and sizes the justified rows need:
+   once theme.js has switched the cookie to grid, reload to get them. *}
+{footer_script require='jquery'}{strip}
+$('#btn-grid').on('click', function() {
+   setTimeout(function() {
+      if (/(^|;\s*)view=grid(;|$)/.test(document.cookie)) window.location.reload();
+   }, 0);
+});
+{/strip}{/footer_script}
+{/if}
+{/if}
 {if $theme_config->photoswipe}
         <div id="photoSwipeData">
 {assign var=idx value=0}

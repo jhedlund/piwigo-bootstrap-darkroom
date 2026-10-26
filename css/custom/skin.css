@@ -274,6 +274,12 @@ body .content-grid .col-outer {
   pointer-events: none;
 }
 
+/* Justified rows (css/justified.css) line up with the album tiles' 8px gutter above them. */
+body #content #thumbnails.bd-justified-on {
+  margin-left: -7px;
+  margin-right: -7px;
+}
+
 /* ---------- Phone: 2-up photo grid ---------- */
 
 @media (max-width: 575.98px) {
