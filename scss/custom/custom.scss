@@ -1,0 +1,72 @@
+// Custom skin (fork): modern dark baseline.
+// Selected by Color theme -> Custom in the theme settings; css/custom/skin.css layers on top.
+// Plain Bootstrap 4.3.1, not bootstrap-material-design, so header.tpl loads plain bootstrap.js.
+// Build: see README.md in this directory.
+@import "../common/variables";
+
+// Palette
+$bd-bg:        #101214;
+$bd-surface:   #17191d;
+$bd-surface-2: #1f2226;
+$bd-text:      #e8eaed;
+$bd-muted:     #9aa0a6;
+$bd-accent:    #8ab4f8;
+$bd-hairline:  rgba(255, 255, 255, .08);
+
+// Darkroom grays, remapped so the darkroom-colors partials below pick up the palette
+$gray-lighter-2: $bd-text;
+$gray-lighter-1: #bdc1c6;
+$gray:           $bd-muted;
+$gray-darker-1:  $bd-bg;
+$gray-darker-2:  $bd-surface-2;
+$gray-darker-3:  $bd-surface;
+
+$enable-shadows: false;
+
+$body-bg:    $bd-bg;
+$body-color: $bd-text;
+$font-family-sans-serif: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+$border-radius:      .625rem;
+$border-radius-lg:   .75rem;
+$border-radius-sm:   .5rem;
+$card-border-radius: .625rem;
+$card-border-color:  $bd-hairline;
+
+$link-color:       $bd-accent;
+$link-hover-color: lighten($bd-accent, 8%);
+
+$navbar-dark-color:        rgba($bd-text, .85);
+$navbar-dark-hover-color:  #fff;
+$navbar-dark-active-color: #fff;
+
+$jumbotron-bg: transparent;
+
+$component-active-bg: $bd-surface-2;
+
+$dropdown-bg:                $bd-surface-2;
+$dropdown-border-color:      $bd-hairline;
+$dropdown-link-color:        $bd-text;
+$dropdown-link-hover-color:  #fff;
+$dropdown-link-hover-bg:     rgba(255, 255, 255, .06);
+$dropdown-link-active-color: #fff;
+$dropdown-link-active-bg:    rgba($bd-accent, .2);
+$dropdown-header-color:      $bd-muted;
+$dropdown-divider-bg:        $bd-hairline;
+
+$input-bg:           $bd-surface;
+$input-color:        $bd-text;
+$input-border-color: rgba(255, 255, 255, .15);
+
+$text-muted: $bd-muted;
+
+@import "../darkroom-colors/variables";
+@import "node_modules/bootstrap/scss/bootstrap";
+@import "../darkroom-colors/nav";
+@import "../darkroom-colors/jumbotron";
+@import "../darkroom-colors/dropdown";
+@import "../darkroom-colors/media";
+@import "../darkroom-colors/card";
+@import "../darkroom-colors/piwigo-components";
+@import "../darkroom-colors/piwigo-plugins";
+@import "../common/picture-info-sidebar";

@@ -3,9 +3,7 @@ npm-debug.log
 yarn-error.log
 .DS_Store
 
-# for custom themes
-css/custom/*.css
-scss/custom/*.scss
+# for custom themes: this fork tracks its custom skin (css/custom, scss/custom)
 
 #########################################################################
 # This list is rather static, so let's use gitignore tricks
