@@ -62,10 +62,25 @@ class ThemeController {
 
         $template->assign('theme_config', $this->config);
 
+        $simple = $this->isSimpleNav();
+        if ($simple) {
+            // Visitors have no grid/list buttons, so a list-view cookie left by a signed-in session in
+            // the same browser would strand them in list view. Templates read $_COOKIE per request.
+            unset($_COOKIE['view']);
+        }
         $template->assign(array(
-            'bd_simple_nav' => $this->isSimpleNav(),
-            'bd_is_guest' => is_a_guest(),
+            'bd_simple_nav' => $simple,
+            'bd_login_url' => $this->visitorLoginUrl(),
         ));
+    }
+
+    // Visitors always get a Login link. A ShareAlbum share identity is signed in, so it goes through
+    // ShareAlbum's own switch (it logs the share user out, then opens the login page).
+    private function visitorLoginUrl() {
+        if (!is_a_guest() && defined('SHAREALBUM_URL_ACTION') && defined('SHAREALBUM_URL_ACTION_LOGIN')) {
+            return get_root_url() . 'index.php?' . SHAREALBUM_URL_ACTION . '=' . SHAREALBUM_URL_ACTION_LOGIN;
+        }
+        return get_root_url() . 'identification.php';
     }
 
     public function showUpgradeWarning() {
