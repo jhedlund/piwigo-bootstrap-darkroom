@@ -36,6 +36,8 @@ class ThemeController {
         add_event_handler('loc_end_index', array($this, 'assignBackLink'), EVENT_HANDLER_PRIORITY_NEUTRAL + 50);
         add_event_handler('loc_end_picture', array($this, 'assignBackLink'), 999);
         add_event_handler('loc_begin_index_thumbnails', array($this, 'returnPageStart'));
+        // Before any loc_end_index output work: a guest on the bare, empty homepage is sent on.
+        add_event_handler('loc_end_index', array($this, 'redirectEmptyGuestHome'), EVENT_HANDLER_PRIORITY_NEUTRAL - 50);
 
         if ($this->config->slick_enabled === true || $this->config->photoswipe === true) {
             add_event_handler('loc_end_picture', array($this, 'getAllThumbnailsInCategory'));
@@ -141,6 +143,32 @@ class ThemeController {
         global $page, $template;
 
         $template->assign('START_ID', $page['start']);
+    }
+
+    // Every album is a private share, so a signed-out guest's homepage is an empty page with no way
+    // in. Send that guest to the login page instead. Only the bare URL counts: an invalid or expired
+    // /v/ share link also renders as the homepage, and must not turn into a login prompt. A guest
+    // who still holds a share in this session goes back to that share.
+    public function redirectEmptyGuestHome() {
+        global $page, $template;
+
+        if (!$this->isSimpleNav() || !is_a_guest()
+            || empty($page['is_homepage']) || !$this->isBareRequest()
+            || !empty($page['items']) || trim((string)$template->get_template_vars('CATEGORIES')) !== '') {
+            return;
+        }
+        if (pwg_get_session_var('sharealbum_guest')) {
+            return;
+        }
+        $share = isset($_SESSION['unlisted_access']['random_key']) ? $_SESSION['unlisted_access']['random_key'] : null;
+        if (is_string($share) && preg_match('/^[A-Za-z0-9]+$/', $share)) {
+            redirect(get_root_url() . 'index.php?/v/' . $share);
+        }
+        redirect(get_root_url() . 'identification.php');
+    }
+
+    private function isBareRequest() {
+        return empty($_SERVER['QUERY_STRING']) && empty($_SERVER['PATH_INFO']);
     }
 
     public function checkIfHomepage() {
